@@ -49,7 +49,7 @@ app.get("/getAllNotes", express.json(), async (req, res) => {
     res.status(500).json({error: error.message})
   }
 })
-  
+
 // Post a note
 app.post("/postNote", express.json(), async (req, res) => {
     try {
@@ -60,7 +60,7 @@ app.post("/postNote", express.json(), async (req, res) => {
           .status(400)
           .json({ error: "Title and content are both required." });
       }
-  
+
       // Send note to database
       const collection = db.collection(COLLECTIONS.notes);
       const result = await collection.insertOne({
@@ -104,7 +104,24 @@ app.delete("/deleteNote/:noteId", express.json(), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 })
-  
+
+
+app.delete("/deleteAllNotes", express.json(), async (req, res) => {
+    try {
+        // Send note to database
+        const collection = db.collection(COLLECTIONS.notes);
+        const nentries = await collection.countDocuments({ });
+        const dropresult = await collection.drop({ });
+        if (!dropresult)
+            res.status(500).json({ error: "unable to drop notes" })
+        else
+            res.status(200).json({ response: nentries + " deleted", });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 // Patch a note
 app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
   try {
@@ -122,11 +139,10 @@ app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
         .json({ error: "Must have at least one of title or content." });
     }
 
-    
+
     // Find note with given ID
     const collection = db.collection(COLLECTIONS.notes);
     const data = await collection.updateOne({
-      username: decoded.username,
       _id: new ObjectId(noteId),
     }, {
       $set: {

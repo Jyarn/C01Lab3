@@ -5,20 +5,11 @@ const Note = ({entry, editNote, deleteNote}) => {
     return (
         <div style={NoteStyle.note}>
             <p style={NoteStyle.text}>{entry.title}</p>
-                <button
-                    onClick={() => editNote(entry)}
-                    >
-                    Edit note
-                </button>
-                {<button
-                    onClick={() => deleteNote(entry)}
-                    >
-                    Delete note
-                </button>}
+                <button onClick={() => editNote(entry)}>Edit note</button>
+                {<button onClick={() => deleteNote(entry)}>Delete note</button>}
         </div>
-    )
-
-}
+    );
+};
 
 export default Note;
 
@@ -34,5 +25,5 @@ const NoteStyle = {
     },
     text: {
       margin: "0px"
-    }, 
+    },
   }

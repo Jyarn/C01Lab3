@@ -3,7 +3,7 @@ import './App.css';
 
 const baseNote = {title: "", content: ""}
 
-function Dialog({open, initialNote, closeDialog, postNote: postNoteState}) {
+function Dialog({open, initialNote, closeDialog, postNote: postNoteState, patchNote: patchNoteState }) {
 
     // -- Dialog props --
     const [note, setNote] = useState(baseNote)
@@ -24,7 +24,7 @@ function Dialog({open, initialNote, closeDialog, postNote: postNoteState}) {
     // -- Database interaction functions --
     const postNote = async () => {
         if (!note || !note.title || !note.content) {
-            return 
+            return
         }
 
         setStatus("Loading...")
@@ -43,19 +43,51 @@ function Dialog({open, initialNote, closeDialog, postNote: postNoteState}) {
                 } else {
                     await response.json().then((data) => {
                         postNoteState(data.insertedId, note.title, note.content)
-                        //setStatus("Note posted!") // Can be replaced with close(), if you want!
+                        setStatus("Note posted!") // Can be replaced with close(), if you want!
                         close()
-                    }) 
+                    })
                 }
             })
         } catch (error) {
             setStatus("Error trying to post note")
             console.log("Fetch function failed:", error)
-        } 
+        }
     }
 
-    const patchNote = (entry) => {
+    const patchNote = async (entry) => {
         // Code for PATCH here
+        if (!note || !note.title || !note.content) {
+            return
+        }
+
+        setStatus("Loading...")
+
+        try {
+            const urlstr = "http://localhost:4000/patchNote/" + note._id
+            const request = {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({title: note.title, content: note.content})
+            }
+
+            await fetch(urlstr, request).then(async (response) => {
+                if (!response.ok) {
+                    setStatus(`Error trying to patch note`)
+                    console.log("Served failed:", response.status)
+                } else {
+                    await response.json().then((data) => {
+                        patchNoteState(note._id, note.title, note.content)
+                        setStatus("Note patched!") // Can be replaced with close(), if you want!
+                        close()
+                    })
+                }
+            })
+        } catch (error) {
+            setStatus("Error trying to post note")
+            console.log("Fetch function failed:", error)
+        }
     }
 
     return (
@@ -99,18 +131,18 @@ export default Dialog;
 const DialogStyle = {
     dialog: {width: "75%"},
     title: {
-        fontSize: "40px", 
-        display: "block", 
+        fontSize: "40px",
+        display: "block",
         width: "100%"
     },
     content: {
-        fontSize: "20px", 
-        display: "block", 
+        fontSize: "20px",
+        display: "block",
         width: "100%"
     },
     buttonWrapper: {
-        display: "flex", 
-        justifyContent: "space-between", 
+        display: "flex",
+        justifyContent: "space-between",
         gap: "10px"
     },
     closeButton: {justifySelf: "end"}
